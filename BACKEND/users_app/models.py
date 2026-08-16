@@ -4,7 +4,10 @@ from django.db import models
 # Create your models here.
 
 class User(AbstractUser):
-    callsign = models.CharField(max_length=50, unique=True)
+    callsign = models.CharField(
+        max_length=50,
+        unique=True
+    )
     discord_id = models.CharField(
         max_length=100,
         unique=True,
