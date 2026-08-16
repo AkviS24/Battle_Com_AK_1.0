@@ -43,6 +43,7 @@ INSTALLED_APPS = [
 
 
     'users_app',
+    'ranks_app',
 ]
 
 AUTH_USER_MODEL = 'users_app.User'

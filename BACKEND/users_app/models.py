@@ -1,6 +1,8 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
+from ranks_app.models import Rank
+
 # Create your models here.
 
 class User(AbstractUser):
@@ -23,3 +25,8 @@ class PlayerProfile(models.Model):
         related_name='profile'
     )
     xp = models.PositiveIntegerField(default=0)
+    current_rank = models.ForeignKey(
+        Rank,
+        on_delete=models.PROTECT,
+        related_name='players'
+    )
