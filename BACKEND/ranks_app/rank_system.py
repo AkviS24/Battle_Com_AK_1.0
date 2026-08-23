@@ -51,6 +51,9 @@ def approve_promotion(profile, approved_by):
     if not next_rank.requires_approval:
         return None
 
+    if approved_by.profile.current_rank.abbreviation != "SMA":
+        return None
+
     promotion = Promotion.objects.create(
         player=profile.user,
         from_rank=profile.current_rank,
