@@ -26,7 +26,6 @@ class RankSystemTestCase(TestCase):
             user=self.user
         )
         self.rank = Rank.objects.get(abbreviation="PV2")
-
         self.approver = User.objects.create_user(
                     username="Approver",
                     password="ApproverPassword",
@@ -36,34 +35,28 @@ class RankSystemTestCase(TestCase):
 
     def test_get_current_rank(self):
         current_rank = get_current_rank(self.profile)
-
         self.assertEqual(current_rank, self.profile.current_rank)
 
     def test_get_next_rank(self):
         next_rank = get_next_rank(self.profile)
-
         self.assertEqual(next_rank.abbreviation, "PV2")
 
     def test_has_required_xp(self):
         self.profile.xp = 100
-
         self.assertTrue(has_required_xp(self.profile, self.rank))
 
     def test_has_not_required_xp(self):
         self.profile.xp = 99
-
         self.assertFalse(has_required_xp(self.profile, self.rank))
 
     def test_promotion_available(self):
         self.profile.xp = 100
-
         self.assertTrue(
             is_promotion_available(self.profile)
         )
 
     def test_promotion_not_available(self):
         self.profile.xp = 99
-
         self.assertFalse(
             is_promotion_available(self.profile)
         )
@@ -72,19 +65,15 @@ class RankSystemTestCase(TestCase):
         highest_rank = Rank.objects.get(
             abbreviation="SMA"
         )
-
         self.profile.current_rank = highest_rank
         self.profile.save()
-
         self.assertFalse(
             is_promotion_available(self.profile)
         )
 
     def test_promote_automatically(self):
         self.profile.xp = 100
-
         promote_automatically(self.profile)
-
         self.assertEqual(
             self.profile.current_rank.abbreviation,
             "PV2"
@@ -92,9 +81,7 @@ class RankSystemTestCase(TestCase):
 
     def test_promote_automatically_multiple_ranks(self):
         self.profile.xp = 1000
-
         promote_automatically(self.profile)
-
         self.assertEqual(
             self.profile.current_rank.abbreviation,
             "CPL"
@@ -105,9 +92,7 @@ class RankSystemTestCase(TestCase):
             abbreviation="CPL"
         )
         self.profile.xp = 1500
-
         promote_automatically(self.profile)
-
         self.assertEqual(
             self.profile.current_rank.abbreviation,
             "CPL"
@@ -123,12 +108,10 @@ class RankSystemTestCase(TestCase):
         )
         self.profile.xp = 1500
         self.profile.save()
-
         promotion = approve_promotion(
             self.profile,
             self.approver
         )
-
         self.assertIsNotNone(promotion)
 
     def test_approve_promotion_only_sma(self):
@@ -137,6 +120,41 @@ class RankSystemTestCase(TestCase):
         )
         self.profile.xp = 1500
         self.profile.save()
+        promotion = approve_promotion(
+            self.profile,
+            self.approver
+        )
+        self.assertIsNone(promotion)
+
+    def test_approve_promotion_no_next_rank(self):
+        self.profile.current_rank = Rank.objects.get(
+            abbreviation="SMA"
+        )
+        self.profile.save()
+        promotion = approve_promotion(
+            self.profile,
+            self.approver
+        )
+        self.assertIsNone(promotion)
+
+    def test_approve_promotion_not_enough_xp(self):
+        self.profile.current_rank = Rank.objects.get(
+            abbreviation="CPL",
+        )
+        self.profile.xp = 1499
+
+        promotion = approve_promotion(
+            self.profile,
+            self.approver
+        )
+
+        self.assertIsNone(promotion)
+
+    def test_promotion_no_approval_required(self):
+        self.profile.current_rank = Rank.objects.get(
+            abbreviation="PV1"
+        )
+        self.profile.xp = 100
 
         promotion = approve_promotion(
             self.profile,
